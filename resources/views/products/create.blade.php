@@ -71,10 +71,13 @@
     </select>
 </div>
 
-{{-- Image Upload --}}
+{{-- Image --}}
 <div class="mb-3">
-    <label class="form-label">Image</label>
-    <input type="file" name="image" class="form-control" onchange="previewImage(this)">
+    <label class="form-label">Image — Upload File</label>
+    <input type="file" name="image_file" class="form-control" accept="image/*" onchange="previewImage(this)">
+    <small class="text-muted">OR paste online image URL below</small>
+    <input type="text" name="image_url" value="{{ old('image_url') }}" class="form-control mt-2"
+           placeholder="https://example.com/product.jpg">
     <img id="preview" class="mt-2 rounded d-none" width="120">
 </div>
 

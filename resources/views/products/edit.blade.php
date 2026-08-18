@@ -79,8 +79,18 @@
 {{-- Image --}}
 <div class="mb-3">
     <label class="form-label">Current Image</label><br>
-    <img src="{{ asset('images/'.$product->image) }}" width="120" class="rounded mb-2">
-    <input type="file" name="image" class="form-control mt-2" onchange="previewNewImage(this)">
+    @if($product->image)
+        @php $src = filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : asset('images/'.$product->image); @endphp
+        <img src="{{ $src }}" width="120" class="rounded mb-2" onerror="this.src='https://placehold.co/120x120?text=No+Image'">
+    @else
+        <span class="text-muted">No image</span>
+    @endif
+    <label class="form-label mt-2">Upload New Image File</label>
+    <input type="file" name="image_file" class="form-control" accept="image/*" onchange="previewNewImage(this)">
+    <small class="text-muted">OR paste online image URL below (blank = keep current)</small>
+    <input type="text" name="image_url"
+           value="{{ old('image_url', filter_var($product->image, FILTER_VALIDATE_URL) ? $product->image : '') }}"
+           class="form-control mt-2" placeholder="https://example.com/product.jpg">
     <img id="newPreview" class="mt-2 rounded d-none" width="120">
 </div>
 

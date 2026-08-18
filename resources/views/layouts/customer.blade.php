@@ -153,12 +153,36 @@
                     Products
                 </a>
 
+                <a href="{{ route('wishlist.index') }}" class="btn btn-outline-primary btn-sm">
+                    Wishlist
+                </a>
+
                 <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-sm">
                     Cart
                 </a>
 
+                <a href="{{ route('compare.show') }}" class="btn btn-outline-primary btn-sm">
+                    Compare
+                </a>
+
                 <a href="{{ route('customer.orders') }}" class="btn btn-outline-secondary btn-sm">
                     Orders
+                </a>
+
+                <a href="{{ route('returns.index') }}" class="btn btn-outline-secondary btn-sm">
+                    Returns
+                </a>
+
+                <a href="{{ route('wallet.index') }}" class="btn btn-outline-success btn-sm">
+                    Wallet
+                </a>
+
+                <a href="{{ route('referral.index') }}" class="btn btn-outline-info btn-sm">
+                    Referral
+                </a>
+
+                <a href="{{ route('gift-cards.index') }}" class="btn btn-outline-warning btn-sm">
+                    Gift Cards
                 </a>
 
                 {{-- PROFILE --}}
@@ -223,8 +247,13 @@
                 <h5>Quick Links</h5>
                 <ul class="list-unstyled footer-links mt-2">
                     <li><a href="{{ route('customer.products') }}">Products</a></li>
-                    <li><a href="{{ route('customer.orders') }}">My Orders</a></li>
+                    <li><a href="{{ route('wishlist.index') }}">Wishlist</a></li>
                     <li><a href="{{ route('cart.index') }}">Cart</a></li>
+                    <li><a href="{{ route('compare.show') }}">Compare</a></li>
+                    <li><a href="{{ route('customer.orders') }}">My Orders</a></li>
+                    <li><a href="{{ route('returns.index') }}">Returns</a></li>
+                    <li><a href="{{ route('wallet.index') }}">Wallet</a></li>
+                    <li><a href="{{ route('referral.index') }}">Referral</a></li>
                     <li><a href="{{ route('customer.profile') }}">My Profile</a></li>
                 </ul>
             </div>

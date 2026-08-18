@@ -119,9 +119,15 @@
             </td>
 
             <td>
-                <img src="{{ asset('images/'.$product->image) }}"
-                     width="80"
-                     class="rounded">
+                @if($product->image)
+                    @if(filter_var($product->image, FILTER_VALIDATE_URL))
+                        <img src="{{ $product->image }}" width="80" class="rounded">
+                    @else
+                        <img src="{{ asset('images/'.$product->image) }}" width="80" class="rounded">
+                    @endif
+                @else
+                    <span class="text-muted">No image</span>
+                @endif
             </td>
 
             <td>

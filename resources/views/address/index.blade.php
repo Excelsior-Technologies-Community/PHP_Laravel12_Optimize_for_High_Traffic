@@ -25,13 +25,15 @@
                         @foreach($addresses as $addr)
                             <option
                                 data-id="{{ $addr->id }}"
+                                data-full_name="{{ $addr->full_name }}"
+                                data-mobile="{{ $addr->mobile }}"
                                 data-address="{{ $addr->address }}"
                                 data-nearby="{{ $addr->nearby }}"
                                 data-city="{{ $addr->city }}"
                                 data-state="{{ $addr->state }}"
                                 data-pincode="{{ $addr->pincode }}"
                             >
-                                {{ $addr->address }}, {{ $addr->city }}
+                                {{ $addr->full_name }}, {{ $addr->address }}, {{ $addr->city }}
                             </option>
                         @endforeach
                     </select>
@@ -57,6 +59,30 @@
 
                     {{-- ✅ EXISTING ADDRESS ID --}}
                     <input type="hidden" name="address_id" id="address_id">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <input
+                                type="text"
+                                name="full_name"
+                                id="full_name"
+                                class="form-control"
+                                placeholder="Full Name"
+                                required
+                                oninput="clearAddressId()">
+                        </div>
+
+                        <div class="col-md-6 mb-2">
+                            <input
+                                type="text"
+                                name="mobile"
+                                id="mobile"
+                                class="form-control"
+                                placeholder="Mobile Number"
+                                required
+                                oninput="clearAddressId()">
+                        </div>
+                    </div>
 
                     <div class="mb-2">
                         <textarea
@@ -133,6 +159,12 @@ function fillFromDropdown(select) {
 
     document.getElementById('address_id').value =
         option.getAttribute('data-id') || '';
+
+    document.getElementById('full_name').value =
+        option.getAttribute('data-full_name') || '';
+
+    document.getElementById('mobile').value =
+        option.getAttribute('data-mobile') || '';
 
     document.getElementById('address').value =
         option.getAttribute('data-address') || '';
