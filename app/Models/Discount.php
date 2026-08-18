@@ -10,15 +10,20 @@ class Discount extends Model
     use HasFactory;
 
    protected $fillable = [
-    'title',
-    'discount_code',
-    'apply_on',
-    'value',
-    'apply_to',
-    'product_ids',
-    'start_date',
-    'end_date',
-];
+     'title',
+     'discount_code',
+     'apply_on',
+     'value',
+     'apply_to',
+     'product_ids',
+     'start_date',
+     'end_date',
+     'status',
+   ];
+
+    protected $casts = [
+        'product_ids' => 'array',
+    ];
 
 
 }

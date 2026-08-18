@@ -30,16 +30,20 @@ class AddressController extends Controller
         $customerId = auth('customer')->id();
 
         $request->validate([
-            'address' => 'required',
-            'city'    => 'required',
-            'state'   => 'required',
-            'pincode' => 'required|min:6',
+            'full_name' => 'required|string|max:255',
+            'mobile'    => 'required|string|max:15',
+            'address'   => 'required',
+            'city'      => 'required',
+            'state'     => 'required',
+            'pincode'   => 'required|min:6',
         ]);
 
         // 🔐 DUPLICATE PROTECTION
         Address::firstOrCreate(
             [
                 'customer_id' => $customerId,
+                'full_name'   => $request->full_name,
+                'mobile'      => $request->mobile,
                 'address'     => $request->address,
                 'nearby'      => $request->nearby,
                 'city'        => $request->city,
@@ -90,16 +94,20 @@ class AddressController extends Controller
         |--------------------------------------------------
         */
         $request->validate([
-            'address' => 'required',
-            'city'    => 'required',
-            'state'   => 'required',
-            'pincode' => 'required|min:6',
+            'full_name' => 'required|string|max:255',
+            'mobile'    => 'required|string|max:15',
+            'address'   => 'required',
+            'city'      => 'required',
+            'state'     => 'required',
+            'pincode'   => 'required|min:6',
         ]);
 
         // 🔥 MAIN FIX: SAME ADDRESS → SAME RECORD
         $address = Address::firstOrCreate(
             [
                 'customer_id' => $customerId,
+                'full_name'   => $request->full_name,
+                'mobile'      => $request->mobile,
                 'address'     => $request->address,
                 'nearby'      => $request->nearby,
                 'city'        => $request->city,
@@ -110,11 +118,13 @@ class AddressController extends Controller
 
         session([
             'checkout_address' => [
-                'address' => $address->address,
-                'nearby'  => $address->nearby,
-                'city'    => $address->city,
-                'state'   => $address->state,
-                'pincode' => $address->pincode,
+                'full_name' => $address->full_name,
+                'mobile'    => $address->mobile,
+                'address'   => $address->address,
+                'nearby'    => $address->nearby,
+                'city'      => $address->city,
+                'state'     => $address->state,
+                'pincode'   => $address->pincode,
             ]
         ]);
 

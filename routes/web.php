@@ -16,15 +16,33 @@ use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\CustomerProfileController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\ProductReviewController;
+use App\Http\Controllers\ProductComparisonController;
+use App\Http\Controllers\CustomerWalletController;
+use App\Http\Controllers\ReturnRequestController;
+use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\CustomerGiftCardController;
+use App\Http\Controllers\CustomerDiscountController;
+use App\Http\Controllers\BackInStockNotificationController;
+use App\Http\Controllers\CustomerSizeGuideController;
+use App\Http\Controllers\ProductRecommendationController;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\ProductTagController;
+use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\FlashSaleController;
+use App\Http\Controllers\SizeGuideController;
+use App\Http\Controllers\AdminReviewController;
+use App\Http\Controllers\AdminReturnController;
+use App\Http\Controllers\AdminWalletController;
+use App\Http\Controllers\GiftCardController;
+use App\Http\Controllers\ImportExportController;
+use App\Http\Controllers\BannerController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboard');
 });
-
-
-
-Route::resource('discounts', \App\Http\Controllers\DiscountController::class);
 
 
 
@@ -127,6 +145,141 @@ Route::post('/cart/update-quantity/{cart}',
     [CartController::class, 'updateQuantity']
 )->name('cart.update.quantity');
 
+/*
+|--------------------------------------------------------------------------
+| WISHLIST (CUSTOMER ONLY)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:customer')->group(function () {
+Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+Route::post('/wishlist/add', [WishlistController::class, 'store'])->name('wishlist.add');
+Route::delete('/wishlist/{wishlist}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
+Route::delete('/wishlist/product/{product}', [WishlistController::class, 'destroyByProduct'])->name('wishlist.remove.by.product');
+});
+
+/*
+|--------------------------------------------------------------------------
+| PRODUCT REVIEWS (CUSTOMER)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:customer')->group(function () {
+    Route::post('/reviews', [ProductReviewController::class, 'store'])->name('reviews.store');
+    Route::get('/products/{product}/reviews', [ProductReviewController::class, 'index'])->name('reviews.index');
+});
+
+/*
+|--------------------------------------------------------------------------
+| PRODUCT COMPARISON (CUSTOMER)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:customer')->group(function () {
+    Route::get('/compare', [ProductComparisonController::class, 'show'])->name('compare.show');
+    Route::post('/compare/add', [ProductComparisonController::class, 'add'])->name('compare.add');
+    Route::post('/compare/remove', [ProductComparisonController::class, 'remove'])->name('compare.remove');
+    Route::post('/compare/clear', [ProductComparisonController::class, 'clear'])->name('compare.clear');
+});
+
+/*
+|--------------------------------------------------------------------------
+| RECENTLY VIEWED (PUBLIC)
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/products/{product}/viewed', [ProductRecommendationController::class, 'trackView'])
+    ->name('products.viewed');
+
+/*
+|--------------------------------------------------------------------------
+| SIZE GUIDE (PUBLIC)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/products/{product}/size-guide', [CustomerSizeGuideController::class, 'show'])
+    ->name('products.size-guide');
+
+/*
+|--------------------------------------------------------------------------
+| RETURNS (CUSTOMER)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:customer')->group(function () {
+    Route::get('/returns', [ReturnRequestController::class, 'index'])->name('returns.index');
+    Route::post('/returns', [ReturnRequestController::class, 'store'])->name('returns.store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| WALLET (CUSTOMER)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:customer')->group(function () {
+    Route::get('/wallet', [CustomerWalletController::class, 'index'])->name('wallet.index');
+    Route::post('/wallet/recharge', [CustomerWalletController::class, 'recharge'])->name('wallet.recharge');
+    Route::get('/wallet/transactions', [CustomerWalletController::class, 'transactions'])->name('wallet.transactions');
+});
+
+/*
+|--------------------------------------------------------------------------
+| REFERRAL (CUSTOMER)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:customer')->group(function () {
+    Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
+    Route::post('/referral/generate-code', [ReferralController::class, 'generateCode'])->name('referral.generate');
+    Route::post('/referral/apply', [ReferralController::class, 'apply'])->name('referral.apply');
+});
+
+/*
+|--------------------------------------------------------------------------
+| GIFT CARDS (CUSTOMER)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:customer')->group(function () {
+    Route::get('/gift-cards', [CustomerGiftCardController::class, 'index'])->name('gift-cards.index');
+    Route::get('/gift-cards/purchase', [CustomerGiftCardController::class, 'purchaseForm'])->name('gift-cards.purchase.form');
+    Route::post('/gift-cards/purchase', [CustomerGiftCardController::class, 'purchase'])->name('gift-cards.purchase');
+    Route::get('/gift-cards/redeem', [CustomerGiftCardController::class, 'redeemForm'])->name('gift-cards.redeem.form');
+    Route::post('/gift-cards/redeem', [CustomerGiftCardController::class, 'redeem'])->name('gift-cards.redeem');
+});
+
+/*
+|--------------------------------------------------------------------------
+| DISCOUNTS (CUSTOMER)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:customer')->group(function () {
+    Route::get('/discounts', [CustomerDiscountController::class, 'index'])->name('customer.discounts.index');
+    Route::get('/discounts/{discount}', [CustomerDiscountController::class, 'show'])->name('customer.discounts.show');
+});
+
+/*
+|--------------------------------------------------------------------------
+| BACK IN STOCK NOTIFICATIONS (CUSTOMER)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:customer')->group(function () {
+    Route::post('/back-in-stock', [BackInStockNotificationController::class, 'store'])->name('back-in-stock.store');
+    Route::delete('/back-in-stock/{notification}', [BackInStockNotificationController::class, 'destroy'])->name('back-in-stock.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| RECOMMENDATIONS (PUBLIC)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/products/{product}/recommendations', [ProductRecommendationController::class, 'related'])
+    ->name('products.recommendations');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -192,6 +345,49 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sizes/{size}/edit', [SizeController::class, 'edit'])->name('sizes.edit');
     Route::put('/sizes/{size}', [SizeController::class, 'update'])->name('sizes.update');
     Route::delete('/sizes/{size}', [SizeController::class, 'destroy'])->name('sizes.destroy');
+
+    // BRANDS
+    Route::resource('brands', BrandController::class);
+
+    // PRODUCT TAGS
+    Route::resource('product-tags', ProductTagController::class);
+
+    // PRODUCT VARIANTS
+    Route::resource('product-variants', ProductVariantController::class);
+
+    // FLASH SALES
+    Route::resource('flash-sales', FlashSaleController::class);
+    Route::post('/flash-sales/{flashSale}/toggle', [FlashSaleController::class, 'toggleStatus'])->name('flash-sales.toggle');
+
+    // SIZE GUIDES
+    Route::resource('size-guides', SizeGuideController::class);
+
+    // REVIEWS
+    Route::get('/admin/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
+    Route::post('/admin/reviews/{review}/status', [AdminReviewController::class, 'updateStatus'])->name('admin.reviews.status');
+
+    // RETURNS
+    Route::get('/admin/returns', [AdminReturnController::class, 'index'])->name('admin.returns.index');
+    Route::post('/admin/returns/{returnRequest}/status', [AdminReturnController::class, 'updateStatus'])->name('admin.returns.status');
+
+    // WALLETS
+    Route::get('/admin/wallets', [AdminWalletController::class, 'index'])->name('admin.wallets.index');
+    Route::post('/admin/wallets/{wallet}/recharge', [AdminWalletController::class, 'recharge'])->name('admin.wallets.recharge');
+    Route::get('/admin/wallets/transactions', [AdminWalletController::class, 'transactions'])->name('admin.wallets.transactions');
+
+    // GIFT CARDS
+    Route::resource('admin/gift-cards', GiftCardController::class)->names('admin.gift-cards');
+
+    // DISCOUNTS
+    Route::resource('discounts', \App\Http\Controllers\DiscountController::class);
+
+    // BANNERS
+    Route::resource('banners', BannerController::class);
+
+    // IMPORT / EXPORT
+    Route::get('/admin/import-export', [ImportExportController::class, 'importForm'])->name('import-export.form');
+    Route::post('/admin/import', [ImportExportController::class, 'import'])->name('import.execute');
+    Route::get('/admin/export', [ImportExportController::class, 'export'])->name('export.execute');
 });
 
 

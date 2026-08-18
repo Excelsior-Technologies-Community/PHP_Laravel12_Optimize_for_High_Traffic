@@ -8,7 +8,9 @@ use App\Models\Customer;
 class Address extends Model
 {
     protected $fillable = [
-        'customer_id',   // ✅ ADD
+        'customer_id',
+        'full_name',
+        'mobile',
         'address',
         'nearby',
         'city',

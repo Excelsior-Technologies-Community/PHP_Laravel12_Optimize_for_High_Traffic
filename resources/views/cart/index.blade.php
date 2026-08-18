@@ -32,8 +32,15 @@
             @endphp
             <tr>
                 <td>
-                    <img src="{{ asset('images/'.$item->product->image) }}"
-                        width="60" class="rounded me-2">
+                    @if($item->product->image)
+                        @if(filter_var($item->product->image, FILTER_VALIDATE_URL))
+                            <img src="{{ $item->product->image }}" width="60" class="rounded me-2">
+                        @else
+                            <img src="{{ asset('images/'.$item->product->image) }}" width="60" class="rounded me-2">
+                        @endif
+                    @else
+                        <img src="https://placehold.co/100x100?text=No+Image" width="60" class="rounded me-2">
+                    @endif
                     {{ $item->product->name }}
                 </td>
                 <td>{{ $sizes[$item->size_id] ?? '-' }}</td>

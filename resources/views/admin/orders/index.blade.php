@@ -107,9 +107,11 @@
             </td>
 
             <td style="max-width:260px">
-                {{ $order->address->address ?? '' }},
-                {{ $order->address->city ?? '' }},
-                {{ $order->address->state ?? '' }} -
+                <strong>{{ $order->address->full_name ?? '' }}</strong><br>
+                {{ $order->address->mobile ?? '' }}<br>
+                {{ $order->address->address ?? '' }},<br>
+                {{ $order->address->city ?? '' }},<br>
+                {{ $order->address->state ?? '' }} -<br>
                 {{ $order->address->pincode ?? '' }}
             </td>
 
@@ -236,3 +238,4 @@
 </div>
 
 @endsection
+

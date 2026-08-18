@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Discount;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Razorpay\Api\Api;
 use Carbon\Carbon;
 
@@ -38,9 +39,9 @@ class CheckoutController extends Controller
                 ->with('error', 'Cart is empty');
         }
 
-        $sizes = Size::pluck('size_name', 'id');
-        $colors = Color::pluck('color_name', 'id');
-        $categories = Category::pluck('category_name', 'id');
+        $sizes      = Cache::remember('filters.sizes', 3600, fn () => Size::pluck('size_name', 'id'));
+        $colors     = Cache::remember('filters.colors', 3600, fn () => Color::pluck('color_name', 'id'));
+        $categories = Cache::remember('filters.categories', 3600, fn () => Category::pluck('category_name', 'id'));
 
         // 🔥 DISCOUNT LOGIC
         $cartProductIds = $cartItems->pluck('product_id')->toArray();
@@ -58,7 +59,7 @@ class CheckoutController extends Controller
         $specificDiscounts = Discount::where('apply_to', 'specific_product')
             ->get()
             ->filter(function ($discount) use ($cartProductIds) {
-                $ids = json_decode($discount->product_ids, true) ?? [];
+                $ids = $discount->product_ids ?? [];
                 return count(array_intersect($ids, $cartProductIds)) > 0;
             });
 
@@ -154,6 +155,8 @@ class CheckoutController extends Controller
         }
 
         $address = Address::where('customer_id', $customerId)
+            ->where('full_name', $sessionAddress['full_name'])
+            ->where('mobile', $sessionAddress['mobile'])
             ->where('address', $sessionAddress['address'])
             ->where('city', $sessionAddress['city'])
             ->where('state', $sessionAddress['state'])
