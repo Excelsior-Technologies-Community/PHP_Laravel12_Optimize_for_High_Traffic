@@ -38,10 +38,29 @@ use App\Http\Controllers\AdminWalletController;
 use App\Http\Controllers\GiftCardController;
 use App\Http\Controllers\ImportExportController;
 use App\Http\Controllers\BannerController;
+use App\Http\Controllers\TrafficMonitoringController;
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('admin.dashboard');
+
+    Route::get('/admin/dashboard', [
+        AdminDashboardController::class,
+        'index'
+    ])->name('admin.dashboard');
+
+    Route::get('/admin/traffic-monitoring', [
+        TrafficMonitoringController::class,
+        'index'
+    ])->name('traffic.dashboard');
+
+    Route::get('/admin/traffic-monitoring/blocked', [
+        TrafficMonitoringController::class,
+        'blocked'
+    ])->name('traffic.blocked');
+
+    Route::delete('/admin/traffic-monitoring/clear', [
+        TrafficMonitoringController::class,
+        'clear'
+    ])->name('traffic.clear');
 });
 
 
