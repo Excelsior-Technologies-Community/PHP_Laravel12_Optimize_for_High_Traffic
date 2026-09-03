@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SizeController;
 use App\Http\Controllers\ColorController;
@@ -40,6 +41,13 @@ use App\Http\Controllers\ImportExportController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\TrafficMonitoringController;
 
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN DASHBOARD / TRAFFIC MONITORING
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/admin/dashboard', [
@@ -64,36 +72,82 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER PROFILE
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/my-profile', [CustomerProfileController::class, 'index'])
-        ->name('customer.profile');
 
-    Route::post('/my-profile', [CustomerProfileController::class, 'update'])
-        ->name('customer.profile.update');
+    Route::get('/my-profile', [
+        CustomerProfileController::class,
+        'index'
+    ])->name('customer.profile');
+
+    Route::post('/my-profile', [
+        CustomerProfileController::class,
+        'update'
+    ])->name('customer.profile.update');
 });
 
 
+/*
+|--------------------------------------------------------------------------
+| STATIC PAGES
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/about-us', [
+    PageController::class,
+    'about'
+])->name('about');
+
+Route::get('/privacy-policy', [
+    PageController::class,
+    'privacy'
+])->name('privacy');
+
+Route::get('/terms-conditions', [
+    PageController::class,
+    'terms'
+])->name('terms');
 
 
-Route::get('/about-us', [PageController::class, 'about'])->name('about');
-Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy');
-Route::get('/terms-conditions', [PageController::class, 'terms'])->name('terms');
-
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER ORDERS
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/my-orders', [CustomerOrderController::class, 'index'])
-        ->name('customer.orders');
+
+    Route::get('/my-orders', [
+        CustomerOrderController::class,
+        'index'
+    ])->name('customer.orders');
 });
 
 
-Route::post('/admin/orders/{order}/status', 
-    [AdminOrderController::class, 'updateStatus']
-)->name('admin.orders.status');
+/*
+|--------------------------------------------------------------------------
+| ADMIN ORDERS
+|--------------------------------------------------------------------------
+*/
 
+Route::middleware(['auth'])->group(function () {
 
-Route::get('/admin/orders', [AdminOrderController::class, 'index'])
-    ->name('admin.orders.index');
+    Route::get('/admin/orders', [
+        AdminOrderController::class,
+        'index'
+    ])->name('admin.orders.index');
+
+    Route::post('/admin/orders/{order}/status', [
+        AdminOrderController::class,
+        'updateStatus'
+    ])->name('admin.orders.status');
+});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -102,232 +156,408 @@ Route::get('/admin/orders', [AdminOrderController::class, 'index'])
 */
 
 // Register
-Route::get('/customer/register', [CustomerAuthController::class, 'register'])
-    ->name('customer.register');
+Route::get('/customer/register', [
+    CustomerAuthController::class,
+    'register'
+])->name('customer.register');
 
-Route::post('/customer/register', [CustomerAuthController::class, 'registerPost'])
-    ->name('customer.register.post');
+Route::post('/customer/register', [
+    CustomerAuthController::class,
+    'registerPost'
+])->name('customer.register.post');
+
 
 // Login
-Route::get('/customer/login', [CustomerAuthController::class, 'login'])
-    ->name('customer.login');
+Route::get('/customer/login', [
+    CustomerAuthController::class,
+    'login'
+])->name('customer.login');
 
-Route::post('/customer/login', [CustomerAuthController::class, 'loginPost'])
-    ->name('customer.login.post');
+Route::post('/customer/login', [
+    CustomerAuthController::class,
+    'loginPost'
+])->name('customer.login.post');
 
-// Logout (protected)
+
+// Logout
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/customer/logout', [CustomerAuthController::class, 'logout'])
-        ->name('customer.logout');
+
+    Route::get('/customer/logout', [
+        CustomerAuthController::class,
+        'logout'
+    ])->name('customer.logout');
 });
 
+
 /*
 |--------------------------------------------------------------------------
-| CUSTOMER PRODUCTS (PUBLIC)
+| CUSTOMER PRODUCTS
 |--------------------------------------------------------------------------
 */
 
-Route::get('/customer/products', [CustomerController::class, 'index'])
-    ->name('customer.products');
+Route::get('/customer/products', [
+    CustomerController::class,
+    'index'
+])->name('customer.products');
+
+
 /*
 |--------------------------------------------------------------------------
-| AUTO LOGOUT ON TAB / WINDOW CLOSE (CUSTOMER)
+| CUSTOMER AUTO LOGOUT
 |--------------------------------------------------------------------------
 */
+
 Route::post('/customer/auto-logout', function () {
+
     if (auth('customer')->check()) {
-       Auth::guard('customer')->logout();
+
+        Auth::guard('customer')->logout();
+
         session()->invalidate();
         session()->regenerateToken();
     }
+
     return response()->noContent();
+
 })->name('customer.auto.logout');
 
+
 /*
 |--------------------------------------------------------------------------
-| CART (CUSTOMER ONLY)
+| CART
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
 
-    Route::get('/cart', [CartController::class, 'index'])
-        ->name('cart.index');
+    Route::get('/cart', [
+        CartController::class,
+        'index'
+    ])->name('cart.index');
 
-    Route::post('/cart/add', [CartController::class, 'store'])
-        ->name('cart.add');
+    Route::post('/cart/add', [
+        CartController::class,
+        'store'
+    ])->name('cart.add');
 
-    Route::delete('/cart/{cart}', [CartController::class, 'destroy'])
-        ->name('cart.remove');
+    Route::delete('/cart/{cart}', [
+        CartController::class,
+        'destroy'
+    ])->name('cart.remove');
+
+    Route::post('/cart/update-quantity/{cart}', [
+        CartController::class,
+        'updateQuantity'
+    ])->name('cart.update.quantity');
 });
-Route::post('/cart/update-quantity/{cart}',
-    [CartController::class, 'updateQuantity']
-)->name('cart.update.quantity');
+
 
 /*
 |--------------------------------------------------------------------------
-| WISHLIST (CUSTOMER ONLY)
+| WISHLIST
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
-Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
-Route::post('/wishlist/add', [WishlistController::class, 'store'])->name('wishlist.add');
-Route::delete('/wishlist/{wishlist}', [WishlistController::class, 'destroy'])->name('wishlist.remove');
-Route::delete('/wishlist/product/{product}', [WishlistController::class, 'destroyByProduct'])->name('wishlist.remove.by.product');
+
+    Route::get('/wishlist', [
+        WishlistController::class,
+        'index'
+    ])->name('wishlist.index');
+
+    Route::post('/wishlist/add', [
+        WishlistController::class,
+        'store'
+    ])->name('wishlist.add');
+
+    Route::delete('/wishlist/{wishlist}', [
+        WishlistController::class,
+        'destroy'
+    ])->name('wishlist.remove');
+
+    Route::delete('/wishlist/product/{product}', [
+        WishlistController::class,
+        'destroyByProduct'
+    ])->name('wishlist.remove.by.product');
 });
+
 
 /*
 |--------------------------------------------------------------------------
-| PRODUCT REVIEWS (CUSTOMER)
+| PRODUCT REVIEWS
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
-    Route::post('/reviews', [ProductReviewController::class, 'store'])->name('reviews.store');
-    Route::get('/products/{product}/reviews', [ProductReviewController::class, 'index'])->name('reviews.index');
+
+    Route::post('/reviews', [
+        ProductReviewController::class,
+        'store'
+    ])->name('reviews.store');
+
+    Route::get('/products/{product}/reviews', [
+        ProductReviewController::class,
+        'index'
+    ])->name('reviews.index');
 });
+
 
 /*
 |--------------------------------------------------------------------------
-| PRODUCT COMPARISON (CUSTOMER)
+| PRODUCT COMPARISON
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/compare', [ProductComparisonController::class, 'show'])->name('compare.show');
-    Route::post('/compare/add', [ProductComparisonController::class, 'add'])->name('compare.add');
-    Route::post('/compare/remove', [ProductComparisonController::class, 'remove'])->name('compare.remove');
-    Route::post('/compare/clear', [ProductComparisonController::class, 'clear'])->name('compare.clear');
+
+    Route::get('/compare', [
+        ProductComparisonController::class,
+        'show'
+    ])->name('compare.show');
+
+    Route::post('/compare/add', [
+        ProductComparisonController::class,
+        'add'
+    ])->name('compare.add');
+
+    Route::post('/compare/remove', [
+        ProductComparisonController::class,
+        'remove'
+    ])->name('compare.remove');
+
+    Route::post('/compare/clear', [
+        ProductComparisonController::class,
+        'clear'
+    ])->name('compare.clear');
 });
 
+
 /*
 |--------------------------------------------------------------------------
-| RECENTLY VIEWED (PUBLIC)
+| RECENTLY VIEWED
 |--------------------------------------------------------------------------
 */
 
-Route::post('/products/{product}/viewed', [ProductRecommendationController::class, 'trackView'])
-    ->name('products.viewed');
+Route::post('/products/{product}/viewed', [
+    ProductRecommendationController::class,
+    'trackView'
+])->name('products.viewed');
+
 
 /*
 |--------------------------------------------------------------------------
-| SIZE GUIDE (PUBLIC)
+| CUSTOMER SIZE GUIDE
 |--------------------------------------------------------------------------
 */
 
-Route::get('/products/{product}/size-guide', [CustomerSizeGuideController::class, 'show'])
-    ->name('products.size-guide');
+Route::get('/products/{product}/size-guide', [
+    CustomerSizeGuideController::class,
+    'show'
+])->name('products.size-guide');
+
 
 /*
 |--------------------------------------------------------------------------
-| RETURNS (CUSTOMER)
+| RETURNS
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/returns', [ReturnRequestController::class, 'index'])->name('returns.index');
-    Route::post('/returns', [ReturnRequestController::class, 'store'])->name('returns.store');
+
+    Route::get('/returns', [
+        ReturnRequestController::class,
+        'index'
+    ])->name('returns.index');
+
+    Route::post('/returns', [
+        ReturnRequestController::class,
+        'store'
+    ])->name('returns.store');
 });
+
 
 /*
 |--------------------------------------------------------------------------
-| WALLET (CUSTOMER)
+| CUSTOMER WALLET
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/wallet', [CustomerWalletController::class, 'index'])->name('wallet.index');
-    Route::post('/wallet/recharge', [CustomerWalletController::class, 'recharge'])->name('wallet.recharge');
-    Route::get('/wallet/transactions', [CustomerWalletController::class, 'transactions'])->name('wallet.transactions');
+
+    Route::get('/wallet', [
+        CustomerWalletController::class,
+        'index'
+    ])->name('wallet.index');
+
+    Route::post('/wallet/recharge', [
+        CustomerWalletController::class,
+        'recharge'
+    ])->name('wallet.recharge');
+
+    Route::get('/wallet/transactions', [
+        CustomerWalletController::class,
+        'transactions'
+    ])->name('wallet.transactions');
 });
+
 
 /*
 |--------------------------------------------------------------------------
-| REFERRAL (CUSTOMER)
+| REFERRAL
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/referral', [ReferralController::class, 'index'])->name('referral.index');
-    Route::post('/referral/generate-code', [ReferralController::class, 'generateCode'])->name('referral.generate');
-    Route::post('/referral/apply', [ReferralController::class, 'apply'])->name('referral.apply');
+
+    Route::get('/referral', [
+        ReferralController::class,
+        'index'
+    ])->name('referral.index');
+
+    Route::post('/referral/generate-code', [
+        ReferralController::class,
+        'generateCode'
+    ])->name('referral.generate');
+
+    Route::post('/referral/apply', [
+        ReferralController::class,
+        'apply'
+    ])->name('referral.apply');
 });
+
 
 /*
 |--------------------------------------------------------------------------
-| GIFT CARDS (CUSTOMER)
+| CUSTOMER GIFT CARDS
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/gift-cards', [CustomerGiftCardController::class, 'index'])->name('gift-cards.index');
-    Route::get('/gift-cards/purchase', [CustomerGiftCardController::class, 'purchaseForm'])->name('gift-cards.purchase.form');
-    Route::post('/gift-cards/purchase', [CustomerGiftCardController::class, 'purchase'])->name('gift-cards.purchase');
-    Route::get('/gift-cards/redeem', [CustomerGiftCardController::class, 'redeemForm'])->name('gift-cards.redeem.form');
-    Route::post('/gift-cards/redeem', [CustomerGiftCardController::class, 'redeem'])->name('gift-cards.redeem');
+
+    Route::get('/gift-cards', [
+        CustomerGiftCardController::class,
+        'index'
+    ])->name('gift-cards.index');
+
+    Route::get('/gift-cards/purchase', [
+        CustomerGiftCardController::class,
+        'purchaseForm'
+    ])->name('gift-cards.purchase.form');
+
+    Route::post('/gift-cards/purchase', [
+        CustomerGiftCardController::class,
+        'purchase'
+    ])->name('gift-cards.purchase');
+
+    Route::get('/gift-cards/redeem', [
+        CustomerGiftCardController::class,
+        'redeemForm'
+    ])->name('gift-cards.redeem.form');
+
+    Route::post('/gift-cards/redeem', [
+        CustomerGiftCardController::class,
+        'redeem'
+    ])->name('gift-cards.redeem');
 });
+
 
 /*
 |--------------------------------------------------------------------------
-| DISCOUNTS (CUSTOMER)
+| CUSTOMER DISCOUNTS
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/discounts', [CustomerDiscountController::class, 'index'])->name('customer.discounts.index');
-    Route::get('/discounts/{discount}', [CustomerDiscountController::class, 'show'])->name('customer.discounts.show');
+
+    Route::get('/discounts', [
+        CustomerDiscountController::class,
+        'index'
+    ])->name('customer.discounts.index');
+
+    Route::get('/discounts/{discount}', [
+        CustomerDiscountController::class,
+        'show'
+    ])->name('customer.discounts.show');
 });
+
 
 /*
 |--------------------------------------------------------------------------
-| BACK IN STOCK NOTIFICATIONS (CUSTOMER)
+| BACK IN STOCK
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
-    Route::post('/back-in-stock', [BackInStockNotificationController::class, 'store'])->name('back-in-stock.store');
-    Route::delete('/back-in-stock/{notification}', [BackInStockNotificationController::class, 'destroy'])->name('back-in-stock.destroy');
+
+    Route::post('/back-in-stock', [
+        BackInStockNotificationController::class,
+        'store'
+    ])->name('back-in-stock.store');
+
+    Route::delete('/back-in-stock/{notification}', [
+        BackInStockNotificationController::class,
+        'destroy'
+    ])->name('back-in-stock.destroy');
 });
+
 
 /*
 |--------------------------------------------------------------------------
-| RECOMMENDATIONS (PUBLIC)
+| PRODUCT RECOMMENDATIONS
 |--------------------------------------------------------------------------
 */
 
-Route::get('/products/{product}/recommendations', [ProductRecommendationController::class, 'related'])
-    ->name('products.recommendations');
+Route::get('/products/{product}/recommendations', [
+    ProductRecommendationController::class,
+    'related'
+])->name('products.recommendations');
 
 
 /*
 |--------------------------------------------------------------------------
-| CHECKOUT FLOW (CUSTOMER ONLY)
+| CHECKOUT
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:customer')->group(function () {
 
     // Address
-    Route::get('/checkout/address', [AddressController::class, 'index'])
-        ->name('address.index');
+    Route::get('/checkout/address', [
+        AddressController::class,
+        'index'
+    ])->name('address.index');
 
-    Route::post('/checkout/address', [AddressController::class, 'saveForCheckout'])
-        ->name('checkout.saveAddress');
+    Route::post('/checkout/address', [
+        AddressController::class,
+        'saveForCheckout'
+    ])->name('checkout.saveAddress');
+
 
     // Payment
-    Route::get('/checkout/payment', [CheckoutController::class, 'paymentPage'])
-        ->name('checkout.payment');
+    Route::get('/checkout/payment', [
+        CheckoutController::class,
+        'paymentPage'
+    ])->name('checkout.payment');
 
-    Route::post('/place-order', [CheckoutController::class, 'placeOrder'])
-        ->name('place.order');
+
+    // Place Order
+    Route::post('/place-order', [
+        CheckoutController::class,
+        'placeOrder'
+    ])->name('place.order');
+
 
     // Razorpay
-    Route::post('/razorpay/order', [CheckoutController::class, 'razorpayOrder'])
-        ->name('razorpay.order');
+    Route::post('/razorpay/order', [
+        CheckoutController::class,
+        'razorpayOrder'
+    ])->name('razorpay.order');
 
-    Route::post('/razorpay/verify', [CheckoutController::class, 'razorpayVerify'])
-        ->name('razorpay.verify');
+    Route::post('/razorpay/verify', [
+        CheckoutController::class,
+        'razorpayVerify'
+    ])->name('razorpay.verify');
+
 
     // Success
     Route::get('/order-success', function () {
@@ -335,81 +565,329 @@ Route::middleware('auth:customer')->group(function () {
     })->name('order.success');
 });
 
+
 /*
 |--------------------------------------------------------------------------
-| ADMIN / BACKEND (DEFAULT AUTH)
+| ADMIN / BACKEND
 |--------------------------------------------------------------------------
+|
+| All routes in this section require the default auth guard.
+|
 */
 
 Route::middleware(['auth'])->group(function () {
 
-    // PRODUCTS
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    /*
+    |--------------------------------------------------------------------------
+    | PRODUCTS
+    |--------------------------------------------------------------------------
+    */
 
-    // CATEGORIES
-    Route::resource('categories', CategoryController::class);
+    Route::get('/products', [
+        ProductController::class,
+        'index'
+    ])->name('products.index');
 
-    // COLORS
-    Route::resource('colors', ColorController::class);
+    Route::get('/products/create', [
+        ProductController::class,
+        'create'
+    ])->name('products.create');
 
-    // SIZES
-    Route::get('/sizes', [SizeController::class, 'index'])->name('sizes.index');
-    Route::get('/sizes/create', [SizeController::class, 'create'])->name('sizes.create');
-    Route::post('/sizes', [SizeController::class, 'store'])->name('sizes.store');
-    Route::get('/sizes/{size}/edit', [SizeController::class, 'edit'])->name('sizes.edit');
-    Route::put('/sizes/{size}', [SizeController::class, 'update'])->name('sizes.update');
-    Route::delete('/sizes/{size}', [SizeController::class, 'destroy'])->name('sizes.destroy');
+    Route::post('/products', [
+        ProductController::class,
+        'store'
+    ])->name('products.store');
 
-    // BRANDS
-    Route::resource('brands', BrandController::class);
+    Route::get('/products/{product}/edit', [
+        ProductController::class,
+        'edit'
+    ])->name('products.edit');
 
-    // PRODUCT TAGS
-    Route::resource('product-tags', ProductTagController::class);
+    Route::put('/products/{product}', [
+        ProductController::class,
+        'update'
+    ])->name('products.update');
 
-    // PRODUCT VARIANTS
-    Route::resource('product-variants', ProductVariantController::class);
+    Route::delete('/products/{product}', [
+        ProductController::class,
+        'destroy'
+    ])->name('products.destroy');
 
-    // FLASH SALES
-    Route::resource('flash-sales', FlashSaleController::class);
-    Route::post('/flash-sales/{flashSale}/toggle', [FlashSaleController::class, 'toggleStatus'])->name('flash-sales.toggle');
 
-    // SIZE GUIDES
-    Route::resource('size-guides', SizeGuideController::class);
+    /*
+    |--------------------------------------------------------------------------
+    | CATEGORIES
+    |--------------------------------------------------------------------------
+    */
 
-    // REVIEWS
-    Route::get('/admin/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
-    Route::post('/admin/reviews/{review}/status', [AdminReviewController::class, 'updateStatus'])->name('admin.reviews.status');
+    Route::resource(
+        'categories',
+        CategoryController::class
+    );
 
-    // RETURNS
-    Route::get('/admin/returns', [AdminReturnController::class, 'index'])->name('admin.returns.index');
-    Route::post('/admin/returns/{returnRequest}/status', [AdminReturnController::class, 'updateStatus'])->name('admin.returns.status');
 
-    // WALLETS
-    Route::get('/admin/wallets', [AdminWalletController::class, 'index'])->name('admin.wallets.index');
-    Route::post('/admin/wallets/{wallet}/recharge', [AdminWalletController::class, 'recharge'])->name('admin.wallets.recharge');
-    Route::get('/admin/wallets/transactions', [AdminWalletController::class, 'transactions'])->name('admin.wallets.transactions');
+    /*
+    |--------------------------------------------------------------------------
+    | COLORS
+    |--------------------------------------------------------------------------
+    */
 
-    // GIFT CARDS
-    Route::resource('admin/gift-cards', GiftCardController::class)->names('admin.gift-cards');
+    Route::resource(
+        'colors',
+        ColorController::class
+    );
 
-    // DISCOUNTS
-    Route::resource('discounts', \App\Http\Controllers\DiscountController::class);
 
-    // BANNERS
-    Route::resource('banners', BannerController::class);
+    /*
+    |--------------------------------------------------------------------------
+    | SIZES
+    |--------------------------------------------------------------------------
+    */
 
-    // IMPORT / EXPORT
-    Route::get('/admin/import-export', [ImportExportController::class, 'importForm'])->name('import-export.form');
-    Route::post('/admin/import', [ImportExportController::class, 'import'])->name('import.execute');
-    Route::get('/admin/export', [ImportExportController::class, 'export'])->name('export.execute');
+    Route::get('/sizes', [
+        SizeController::class,
+        'index'
+    ])->name('sizes.index');
+
+    Route::get('/sizes/create', [
+        SizeController::class,
+        'create'
+    ])->name('sizes.create');
+
+    Route::post('/sizes', [
+        SizeController::class,
+        'store'
+    ])->name('sizes.store');
+
+    Route::get('/sizes/{size}/edit', [
+        SizeController::class,
+        'edit'
+    ])->name('sizes.edit');
+
+    Route::put('/sizes/{size}', [
+        SizeController::class,
+        'update'
+    ])->name('sizes.update');
+
+    Route::delete('/sizes/{size}', [
+        SizeController::class,
+        'destroy'
+    ])->name('sizes.destroy');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BRANDS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'brands',
+        BrandController::class
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PRODUCT TAGS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'product-tags',
+        ProductTagController::class
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PRODUCT VARIANTS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'product-variants',
+        ProductVariantController::class
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FLASH SALES
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'flash-sales',
+        FlashSaleController::class
+    );
+
+    Route::post(
+        '/flash-sales/{flashSale}/toggle',
+        [FlashSaleController::class, 'toggleStatus']
+    )->name('flash-sales.toggle');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SIZE GUIDES
+    |--------------------------------------------------------------------------
+    |
+    | IMPORTANT:
+    | Custom Size Guide routes MUST come before Route::resource()
+    | so that Laravel does not treat "bulk-delete" or "export"
+    | as a {sizeGuide} parameter.
+    |
+    */
+
+    // Bulk Delete
+    Route::post(
+        '/size-guides/bulk-delete',
+        [SizeGuideController::class, 'bulkDelete']
+    )->name('size-guides.bulk-delete');
+
+
+    // Duplicate Size Guide
+    Route::post(
+        '/size-guides/{sizeGuide}/duplicate',
+        [SizeGuideController::class, 'duplicate']
+    )->name('size-guides.duplicate');
+
+
+    // CSV Export
+    Route::get(
+        '/size-guides-export/csv',
+        [SizeGuideController::class, 'export']
+    )->name('size-guides.export');
+
+
+    // Standard CRUD
+    Route::resource(
+        'size-guides',
+        SizeGuideController::class
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN REVIEWS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/admin/reviews', [
+        AdminReviewController::class,
+        'index'
+    ])->name('admin.reviews.index');
+
+    Route::post('/admin/reviews/{review}/status', [
+        AdminReviewController::class,
+        'updateStatus'
+    ])->name('admin.reviews.status');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN RETURNS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/admin/returns', [
+        AdminReturnController::class,
+        'index'
+    ])->name('admin.returns.index');
+
+    Route::post('/admin/returns/{returnRequest}/status', [
+        AdminReturnController::class,
+        'updateStatus'
+    ])->name('admin.returns.status');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN WALLETS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/admin/wallets', [
+        AdminWalletController::class,
+        'index'
+    ])->name('admin.wallets.index');
+
+    Route::post('/admin/wallets/{wallet}/recharge', [
+        AdminWalletController::class,
+        'recharge'
+    ])->name('admin.wallets.recharge');
+
+    Route::get('/admin/wallets/transactions', [
+        AdminWalletController::class,
+        'transactions'
+    ])->name('admin.wallets.transactions');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN GIFT CARDS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'admin/gift-cards',
+        GiftCardController::class
+    )->names('admin.gift-cards');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DISCOUNTS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'discounts',
+        \App\Http\Controllers\DiscountController::class
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BANNERS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'banners',
+        BannerController::class
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | IMPORT / EXPORT
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/admin/import-export', [
+        ImportExportController::class,
+        'importForm'
+    ])->name('import-export.form');
+
+    Route::post('/admin/import', [
+        ImportExportController::class,
+        'import'
+    ])->name('import.execute');
+
+    Route::get('/admin/export', [
+        ImportExportController::class,
+        'export'
+    ])->name('export.execute');
 });
 
 
+/*
+|--------------------------------------------------------------------------
+| DEFAULT REGISTER REDIRECT
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/register', function () {
     return redirect()->route('login');
@@ -418,6 +896,8 @@ Route::get('/register', function () {
 Route::post('/register', function () {
     return redirect()->route('login');
 });
+
+
 /*
 |--------------------------------------------------------------------------
 | HOME
@@ -427,5 +907,12 @@ Route::post('/register', function () {
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+/*
+|--------------------------------------------------------------------------
+| AUTH ROUTES
+|--------------------------------------------------------------------------
+*/
 
 require __DIR__ . '/auth.php';
