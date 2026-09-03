@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class SizeGuide extends Model
 {
-    protected $fillable = ['product_id', 'size_id', 'measurements', 'description'];
+    protected $fillable = [
+        'product_id',
+        'size_id',
+        'measurements',
+        'description',
+    ];
 
     protected $casts = [
         'measurements' => 'array',
